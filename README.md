@@ -15,12 +15,12 @@ npm install --save react-polygon-drawer
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'react-polygon-drawer'
+import ReactPolygonDrawer from 'react-polygon-drawer'
 import 'react-polygon-drawer/dist/index.css'
 
 class Example extends Component {
   render() {
-    return <MyComponent />
+    return <ReactPolygonDrawer />
   }
 }
 ```

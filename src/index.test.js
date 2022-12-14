@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import { ReactPolygonDrawer } from '.'
 
-describe('ExampleComponent', () => {
+describe('ReactPolygonDrawer', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(ReactPolygonDrawer).toBeTruthy()
   })
 })
