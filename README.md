@@ -24,6 +24,7 @@ class Example extends Component {
     return <ReactPolygonDrawer />
   }
 }
+
 ```
 ## Functionality
 This react component has two modes to close the polygon. 
