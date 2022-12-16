@@ -9,7 +9,8 @@ const App = () => {
   return <div style={{
     backgroundColor:'black',
     width,
-    height
+    height,
+    userSelect:'none'
   }}>
     <img src={logo}/>
     <ReactPolygonDrawer 

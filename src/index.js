@@ -1,6 +1,5 @@
 // @ts-check
 import React from "react";
-// import styles from './styles.module.css'
 
 /**
  * @typedef {Object} Props
@@ -14,23 +13,22 @@ import React from "react";
  * @prop {number=} maxPoints
  * @prop {number=} proximity
  * @prop {string=} className
- * @prop {boolean=} showCoordinates
- * @prop {boolean=} checkforClose
+ * @prop {boolean=} disableAutoClosing
  * @prop {Coordinate[]} existingCoordinates
  * @prop {(coordinates: Coordinate[])=>void} onFinish
  * @prop {(coordinate: Coordinate)=>void} onPoint
  */
 
 /**
- * @typedef {Object} State
- * @prop {Coordinate[]} coordinates
- * @prop {Coordinate=} activeCoordinate
- */
-
-/**
  * @typedef {Object} Coordinate
  * @prop {number} x
  * @prop {number} y
+ */
+
+/**
+ * @typedef {Object} State
+ * @prop {Coordinate[]} coordinates
+ * @prop {Coordinate=} activeCoordinate
  */
 
 /**
@@ -41,19 +39,17 @@ class ReactPolygonDrawer extends React.Component {
 
     /** @type {Props} */
     static defaultProps = {
-        height: 0,
-        width: 0,
-        onFinish: () => {},
+        height: 400,
+        width: 400,
+        onFinish: console.log,
         onPoint: () => {},
         proximity: 20,
-        showCoordinates : false,
         existingCoordinates : [],
         lineWidth : 3,
         fillColor : "rgba(205, 92, 92, 0.5)",
         lineColor : '#FF3333',
         pointColor : '#FF3333',
-        checkforClose : false
-
+        disableAutoClosing : false
     }
 
     /** @type {State} */
@@ -63,8 +59,6 @@ class ReactPolygonDrawer extends React.Component {
     }
 
     isDrawing = false;
-    drawMultiple = false;
-    coordinatesLength = 0;
     
     canvasRef = React.createRef();
 
@@ -72,17 +66,49 @@ class ReactPolygonDrawer extends React.Component {
         this.addListeners();
         this.clearCanvas();
         this.setDrawingFlag(true);
+        this.drawfromPassedCoordinates();
+    }
 
-        if(this.props.showCoordinates)
-        {
-            //redraw the coordinates 
-            this.drawfromExisting(this.props.existingCoordinates);
+    componentWillUnmount(){
+        this.removeListeners();
+    }
+
+    addListeners = () => {
+        const {
+            current
+        } = this.canvasRef;
+        if(!current) return;
+
+        current.addEventListener("click", this.onClick);
+        current.addEventListener("mousemove", this.onMouseover);
+        
+        if(!this.props.disableAutoClosing){
+            current.addEventListener("dblclick", this.dblclick);
         }
     }
 
+    removeListeners = () => {
+        const {
+            current
+        } = this.canvasRef;
+        if(!current) return;
 
-    drawfromExisting = (coordinates) => {
+        current.removeEventListener("click", this.onClick);
+        current.removeEventListener("mousemove", this.onMouseover);
 
+        if(!this.props.disableAutoClosing){
+            current.removeEventListener("dblclick", this.dblclick);
+        }
+    }
+
+    drawfromPassedCoordinates = () => {
+
+        const {
+            existingCoordinates: coordinates
+        } = this.props;
+        if(!coordinates?.length){
+            return
+        }
         const context = this.getCanvasContext();
         context.beginPath();
         context.moveTo(coordinates[0].x , coordinates[0].y );
@@ -118,32 +144,14 @@ class ReactPolygonDrawer extends React.Component {
         return null;
     }
 
-    componentWillUnmount(){
-        this.removeListeners();
-    }
-
-    removeListeners = () => {
+    dblclick = (_ev) => {
         const {
-            current
-        } = this.canvasRef;
-        if(!current) return;
-
-        current.removeEventListener("click", this.onClick);
-        current.removeEventListener("dblclick", this.dblclick);
-        current.removeEventListener("mousemove", this.onMouseover);
-    }
-
-    dblclick = (ev) => {
-        console.log("dblclick")
-        this.onClick(ev);
-
-        const {
-            coordinates: [{x, y}]
+            coordinates
         } = this.state;
 
-        this.pushCoordinates(x, y);
+        const [{x, y}] = coordinates;
 
-        this.coordinatesLength = this.state.coordinates.length;
+        this.pushCoordinates(x, y);
 
         this.redrawCoordinatesFromState();
 
@@ -151,27 +159,20 @@ class ReactPolygonDrawer extends React.Component {
 
         this.setDrawingFlag(false);
 
-        this.props.onFinish(this.state.coordinates);
+        const finalCoordinates = [
+            ...coordinates,
+            coordinates[0]
+        ]
+        this.props.onFinish(finalCoordinates);
 
-    }
-
-    addListeners = () => {
-        const {
-            current
-        } = this.canvasRef;
-        if(!current) return;
-
-        current.addEventListener("click", this.onClick);
-        current.addEventListener("dblclick", this.dblclick);
-        current.addEventListener("mousemove", this.onMouseover);
     }
 
     onClick = (ev) => {
-        if(ev.detail === 2) return ;
+        if(ev.detail === 2) return; // exclude dblclick
         if(!this.isDrawing){
             this.setDrawingFlag(true);
             this.redrawCoordinatesFromState();
-            this.setState({                               //uncomment for having only single ROI at a time ********************
+            this.setState({
                 coordinates: []
             }, this.redrawCoordinatesFromState);
         }
@@ -212,7 +213,7 @@ class ReactPolygonDrawer extends React.Component {
         this.setActiveCoordinate(x, y);
         this.clearCanvas();
         this.drawCoordinates();
-        if(!this.props.checkforClose)
+        if(!this.props.disableAutoClosing)
         {
             this.showClosedLineHint();
         }
@@ -238,7 +239,6 @@ class ReactPolygonDrawer extends React.Component {
         context.beginPath();
 
         coordinates.forEach((coordinate) => {
-            //context.moveTo(coordinate.x, coordinate.y);
             context.lineTo(coordinate.x, coordinate.y);
         });
 
@@ -259,13 +259,10 @@ class ReactPolygonDrawer extends React.Component {
         if(!activeCoordinate) return;
         if(coordinates.length < 2) return;
 
-        if(this.drawMultiple) return;
-
     
         const context = this.getCanvasContext();
         context.beginPath();
         coordinates.forEach((coordinate) => {
-            //context.moveTo(coordinate.x, coordinate.y);
             context.lineTo(coordinate.x, coordinate.y);
         });
 
@@ -296,11 +293,11 @@ class ReactPolygonDrawer extends React.Component {
     drawCoordinates = () => {
         this.redrawCoordinatesFromState();
 
-        if(this.props.checkforClose)
+        if(this.props.disableAutoClosing)
         {
             const lastCoordinate = this.getLastCoordinate();
             if(lastCoordinate){
-                this.checkForClose(lastCoordinate);
+                this.disableAutoClosing(lastCoordinate);
             }
         }
     }
@@ -355,12 +352,6 @@ class ReactPolygonDrawer extends React.Component {
         })
     }
 
-    resetActiveCoordinate = (x, y) => {
-        this.setState({
-            activeCoordinate: undefined
-        })
-    }
-
     drawDot = (x, y) => {
         const context = this.getCanvasContext();
         if(!context) return;
@@ -375,7 +366,7 @@ class ReactPolygonDrawer extends React.Component {
      * @param {Coordinate} coordinate
      * @returns 
      */
-    checkForClose = ({x,y}) => {
+    disableAutoClosing = ({x,y}) => {
         const {
             coordinates
         } = this.state;
@@ -420,12 +411,6 @@ class ReactPolygonDrawer extends React.Component {
             width,
             height
         } = this.props;
-        /**
-         * draw a canvas of w, h
-         * make is transparent
-         * css absolute
-         * top 0, left 0
-         */
         return <React.Fragment>
             <canvas 
                 id="polygon-drawer" 

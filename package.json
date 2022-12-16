@@ -1,8 +1,8 @@
 {
   "name": "react-polygon-drawer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Draw polygon over any element",
-  "author": "dpk-jha",
+  "author": "apra-Labs",
   "keywords": [
     "react",
     "react canvas",
@@ -11,7 +11,7 @@
     "region of interest"
   ],
   "license": "MIT",
-  "repository": "dpk-jha/react-polygon-drawer",
+  "repository": "apra-Labs/react-polygon-drawer",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.js",

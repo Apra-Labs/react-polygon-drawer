@@ -15,23 +15,20 @@ npm i react-polygon-drawer
 ## Usage
 
 ```jsx
-import React, { Component } from 'react'
+import React from 'react'
+import logo from './Demo.png'
 
 import ReactPolygonDrawer from 'react-polygon-drawer'
 
-class Example extends Component {
-  render() {
-    return <ReactPolygonDrawer />
-  }
+const App = () => {
+  return <div>
+    <img src={logo}/>
+    <ReactPolygonDrawer/>
+  </div>
 }
 
 ```
-## Functionality
-This react component has two modes to close the polygon. 
-* Double Click mode - Double click the element to close the polygon
-* Check for Close mode - User click near the proximity of the initial start point of the polygon, it automatically get closed.
-
-It comes with various user defined props.
+## Props
 
 |Prop Name|Type|Description|Default Value|
 |--|-------|---------|------|
@@ -40,18 +37,26 @@ It comes with various user defined props.
 |lineWidth|number?|Width of the line to be sketched on canvas|3|
 |lineColor|string?|Color of the line to be sketched on canvas|'#FF3333'|
 |pointColor|string?|Color of the point to be dotted on canvas|'#FF3333'|
-|checkforClose|boolean?|User click near the proximity of the initial start point of the polygon, it automatically get closed|false|
-|proximity|number?|Approximated value near inital start point of polygon , in the vicinity of which if user clicks, polygon closes automatically|20|
-|showCoordinates|boolean?|Instead of drawing, if existing coordinates are to be rendered on element|false|
-|existingCoordinates|Coordinate[]|List of (x,y) coordinates to be rendered|-|
+|fillColor|string?|Color of the fill region of polygon|'rgba(205, 92, 92, 0.5)'|
+|disableAutoClosing|boolean?| if false, double click closes the polygon automatically, else select the closing coordinates manually by clicking|false|
+|proximity|number?|Approximated value near inital start point of polygon, in the vicinity of which if user clicks, polygon closes|20|
+|existingCoordinates|Coordinate[]|List of {x,y} coordinates to be rendered|-|
 |minPoints|number?|Minimum number of points in polygon|-|
 |maxPoints|number?|Maximum number of points in polygon|-|
 |onFinish|(coordinates: Coordinate[])=>void|Callback function once polygon is drawn|-|
 |onPoint|(coordinate: Coordinate)=>void|Callback function once point is dotted|-|
 
+```
+/**
+ * @typedef {Object} Coordinate
+ * @prop {number} x
+ * @prop {number} y
+ */
+```
+
 ## For Contribution and Run Example
 ```bash
-git clone "https://github.com/Apra-Labs/react-polygon-drawer.git"
+git clone "https://github.com/apra-Labs/react-polygon-drawer.git"
 cd react-polygon-drawer
 npm i
 cd examples
